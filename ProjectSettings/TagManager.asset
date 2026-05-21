@@ -9,6 +9,10 @@ TagManager:
   - PlayerBody
   - PlayerArmsAndLegs
   - Helper
+  - Fluid
+  - PlayerCamera
+  - EnemyTrigger
+  - Roommate Trigger
   layers:
   - Default
   - TransparentFX
@@ -19,8 +23,8 @@ TagManager:
   - PlayerBody
   - PlayerArmsAndLegs
   - Player
-  - 
-  - 
+  - Obstacles
+  - Guard311
   - 
   - 
   - 

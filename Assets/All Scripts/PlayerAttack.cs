@@ -9,7 +9,7 @@ public class PlayerAttack : MonoBehaviour
     private float damage = 15f;
     private float attackCoolDown = 0.7f;
     private float lastAttackTime;
-    private float attackRange;
+    private float attackRange = 3f;
 
     [Header("References")]
     public Camera playerCamera;         
@@ -43,7 +43,7 @@ public class PlayerAttack : MonoBehaviour
     public void InteractWithDoor()
     {
         RaycastHit hit;
-        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, attackRange))
+        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, 3f))
         {
             DoorController door = hit.transform.GetComponent<DoorController>();
             if (door != null)

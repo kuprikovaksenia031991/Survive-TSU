@@ -5,7 +5,7 @@ public class PlayerNoteReader : MonoBehaviour
 {
     public GameObject notePanel; // UI панель
     public Text noteTextUI; // текстовое поле
-    public SimpleFPSController fpsController; // отключение движений при чтении
+    public SimpleFPSControllers fpsController; // отключение движений при чтении
 
     private NoteController currentNote;
 

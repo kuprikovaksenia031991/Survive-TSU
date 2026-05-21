@@ -32,6 +32,7 @@ public class WarriorHumanAIs : MonoBehaviour
         agent.stoppingDistance = stopDistance;
 
         animator = GetComponent<Animator>();
+        //animator.SetTrigger("")
     }
 
     void Update()
