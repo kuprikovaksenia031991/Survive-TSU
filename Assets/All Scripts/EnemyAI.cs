@@ -22,7 +22,7 @@ public class EnemyAI : MonoBehaviour
     public float timeToRotate = 2f;
     public float speedWalk = 2f;
     public float speedRun = 3f;
-    private float maxChaseDistance = 2.5f;
+    public float maxChaseDistance = 6f; // Расстояние, дальше которого от комнаты нельзя убегать
 
     public float viewRadius = 15f;
     public float viewAngle = 90f;
@@ -40,13 +40,14 @@ public class EnemyAI : MonoBehaviour
     private float mTimeToRotate;
     private bool mPlayerInRange;
     private bool mPlayerNear;
-    private bool mIsPatrol;
+    private bool mIsPatrol = true;
     private bool mCaughtPlayer;
 
     private Transform player;
     private NavMeshAgent agent;
 
     public Transform guardRoom;
+    public DoorController temporaryDoor;
     public string enemyTag;
 
     public LayerMask playerMask;
@@ -59,6 +60,7 @@ public class EnemyAI : MonoBehaviour
 
     void Start()
     {
+        temporaryDoor.ToggleDoor();
         enemyTag = transform.tag;
 
         mPlayerPosition = Vector3.zero;
@@ -76,23 +78,41 @@ public class EnemyAI : MonoBehaviour
         animator.SetInteger("WeaponType", weaponType); //начальное оружие для зомби - укусы
 
         agent = GetComponent<NavMeshAgent>();
-
+    
         //если противник - участник первой катсцены со студентом выбегающим из комнаты, то ему не нужно нападать на игрока пока сосед не погибнет
         if (isEnemyTrigger)
         {
-            return;
+            agent.isStopped = true;
         }
-        agent.isStopped = false;
-        agent.speed = speedWalk;
-        agent.SetDestination(waypoints[mCurrentWaypointIndex].position);
 
-        agent.stoppingDistance = stopDistance;
+        else if (waypoints.Length > 0)
+        {
+            agent.speed = speedWalk;
+           // agent.SetDestination(waypoints[mCurrentWaypointIndex].position);
+            agent.stoppingDistance = stopDistance;
+        }
     }
 
     void Update()
     {
-        EnviromentView();
 
+        float distanceToRoom = Vector3.Distance(transform.position, guardRoom.position);
+        if (!mIsPatrol && distanceToRoom > maxChaseDistance)
+        {
+            mIsPatrol = true;
+
+            mPlayerInRange = false;
+            mPlayerNear = false;
+            mCaughtPlayer = false;
+
+            agent.isStopped = false;
+            agent.speed = speedWalk;
+
+            agent.SetDestination(guardRoom.position);
+
+            return;
+        }
+        EnviromentView();
         if (!mIsPatrol)
         {
             Chasing();
@@ -101,37 +121,10 @@ public class EnemyAI : MonoBehaviour
         {
             Patrolling();
         }
-        /*
-        if (player == null)
-            return;
-
-        // AI PATHFINDING
-        agent.SetDestination(player.position);
 
         float distance =
             Vector3.Distance(transform.position, player.position);
-
-        // Поворот к игроку
-        Vector3 lookPos = player.position - transform.position;
-        lookPos.y = 0;
-
-        if (lookPos != Vector3.zero)
-        {
-            Quaternion rot =
-                Quaternion.LookRotation(lookPos);
-
-            transform.rotation =
-                Quaternion.Slerp(
-                    transform.rotation,
-                    rot,
-                    Time.deltaTime * 8f
-                );
-        }
-
-        */
-        float distance =
-            Vector3.Distance(transform.position, player.position);
-        if (distance <= stopDistance + 0.3f)
+        if (mPlayerInRange && distance <= stopDistance + 0.3f)
         {
             TryAttack();
         }
@@ -151,106 +144,86 @@ public class EnemyAI : MonoBehaviour
         animator.SetFloat("VelY", horizontalVel.z);
         animator.SetFloat("Speed", horizontalVel.magnitude);
     }
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag(enemyTag))
-        {
-            GameObject enemyGuard = GameObject.Find(enemyTag);
-            if (enemyGuard != null)
-            {
-                mPlayerNear = true;
-            }
-        }
-    }
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag(enemyTag))
-        {
-            GameObject enemyGuard_ = GameObject.Find(enemyTag);
-            if (enemyGuard_ != null)
-            {
-                mPlayerNear = false;
-            }
-        }
-    }
     private void Chasing()
     {
-        float distanceToRoom = Vector3.Distance(transform.position, guardRoom.position);
+        if (player == null)
+            return;
 
-        // Если зомби отошёл слишком далеко — возвращаемся
-        if (distanceToRoom > maxChaseDistance + 5f)
+        float distanceToPlayer =
+            Vector3.Distance(transform.position, player.position);
+
+        // Если слишком далеко от комнаты — возвращаемся
+        float distanceToRoom =
+            Vector3.Distance(transform.position, guardRoom.position);
+
+        if (distanceToRoom > maxChaseDistance)
         {
-            Patrolling();
+            mIsPatrol = true;
+            mPlayerInRange = false;
+            mPlayerNear = false;
+
+            agent.isStopped = false;
+            agent.speed = speedWalk;
+            //agent.SetDestination(guardRoom.position);
+
             return;
         }
-        mPlayerNear = false;
-        playerLastPosition = Vector3.zero;
 
-        if (!mCaughtPlayer)
+        // Если игрок рядом — преследуем
+        if (distanceToPlayer > stopDistance)
         {
+            agent.isStopped = false;
+
             Move(speedRun);
-            agent.SetDestination(mPlayerPosition);
-        }
-        if (agent.remainingDistance <= agent.stoppingDistance)
-        {
-            if (mWaitTime <= 0 && !mCaughtPlayer && Vector3.Distance(transform.position, 
-                         GameObject.FindGameObjectWithTag("Player").transform.position) >= 6f)
-            {
-                mIsPatrol = true;
-                mPlayerNear = false;
-                Move(speedWalk);
-                mTimeToRotate = timeToRotate;
-                mWaitTime = startWaitTime;
-                agent.SetDestination(waypoints[mCurrentWaypointIndex].position);
-            }
-            else
-            {
-                if (Vector3.Distance(transform.position, 
-                        GameObject.FindGameObjectWithTag("Player").transform.position) >= 2.5f)
-                {
-                    Stop();
-                    mWaitTime -= Time.deltaTime;
-                }
-            }
-        }
-    }
-    private void Patrolling()
-    {
-        if (mPlayerNear)
-        {
-            if (mTimeToRotate <= 0)
-            {
-                Move(speedWalk);
-                LookingPlayer(playerLastPosition);
-                
-            }
-            else
-            {
-                Stop();
-                mTimeToRotate -= Time.deltaTime;
-            }
+            agent.SetDestination(player.position);
         }
         else
         {
-            mPlayerNear = false;
-            playerLastPosition = Vector3.zero;
-            agent.SetDestination(waypoints[mCurrentWaypointIndex].position);
-            if (agent.remainingDistance <= agent.stoppingDistance)
-            {
-                if (mWaitTime <= 0)
-                {
-                    NextPoint();
-                    Move(speedWalk);
-                    mWaitTime = startWaitTime;
-                }
-                else
-                {
-                    Stop();
-                    mWaitTime -= Time.deltaTime;
-                }
-            }
+            // Останавливаемся для атаки
+            agent.isStopped = true;
+
+            TryAttack();
         }
     }
+
+    private void Patrolling()
+    {
+        if (guardRoom == null)
+            return;
+
+        agent.isStopped = false;
+        agent.speed = speedWalk;
+
+        // Проверяем последнюю позицию игрока
+        if (mPlayerNear)
+        {
+            agent.SetDestination(playerLastPosition);
+
+            if (!agent.pathPending &&
+                agent.remainingDistance <= 0.5f)
+            {
+                mPlayerNear = false;
+
+                // Возвращаемся домой
+              //  agent.SetDestination(guardRoom.position);
+            }
+
+            return;
+        }
+
+        // Просто идем домой
+        agent.SetDestination(guardRoom.position);
+    }
+
+    // private void GoToNextWaypoint()
+    // {
+    //     if (waypoints.Length > 0)
+    //     {
+    //         agent.SetDestination(waypoints[mCurrentWaypointIndex].position);
+    //         mCurrentWaypointIndex = (mCurrentWaypointIndex + 1) % waypoints.Length;
+    //     }
+    // }
+
     void Move(float speed)
     {
         agent.isStopped = false;
@@ -261,67 +234,91 @@ public class EnemyAI : MonoBehaviour
         agent.isStopped = true;
         agent.speed = 0;
     }
-    private void NextPoint()
-    {
-        Vector3 randomOffset = new Vector3(Random.Range(-1, 1f), 0, Random.Range(-1f, 1f)); // 1f - радиус комнаты
-        Vector3 nextPoint = guardRoom.position + randomOffset;
-        agent.SetDestination(nextPoint);
-    }
-        
+    //private void NextPoint()
+    //{
+    //    if (guardRoom != null)
+    //    {
+    //        Vector3 randomOffset = new Vector3(Random.Range(-1f, 1f), 0, Random.Range(-1f, 1f));
+    //        Vector3 nextPoint = guardRoom.position + randomOffset;
+    //        agent.SetDestination(nextPoint);
+    //    }
+    //    else
+    //    {
+    //        GoToNextWaypoint();
+    //    }
+    //}
+
     void CaughtPlayer()
     {
         mCaughtPlayer = true;
     }
-    void LookingPlayer(Vector3 player)
+    void LookingPlayer(Vector3 checkPosition)
     {
-        agent.SetDestination(player);
-        if (Vector3.Distance(transform.position, player) <= 0.3) ;
+        // Приказываем зомби идти к последней известной точке игрока
+        agent.SetDestination(checkPosition);
+
+        // Если зомби почти дошел до этой точки (осталось меньше 0.5 метров)
+        if (!agent.pathPending && agent.remainingDistance <= 0.5f)
         {
+            // Зомби пришел, но игрока там нет. Он начинает "оглядываться" (ждет время mWaitTime)
+            Stop();
+            mWaitTime -= Time.deltaTime;
+
             if (mWaitTime <= 0)
             {
+                // Время ожидания вышло, зомби сдался и возвращается к обычному патрулированию
                 mPlayerNear = false;
                 Move(speedWalk);
-                agent.SetDestination(waypoints[mCurrentWaypointIndex].position);
-                mWaitTime = startWaitTime;
+               // GoToNextWaypoint(); // Идет к следующей точке обхода
+                mWaitTime = startWaitTime; // Сбрасываем таймер ожидания на будущее
                 mTimeToRotate = timeToRotate;
             }
-            else
-            {
-                Stop();
-                mWaitTime -= Time.deltaTime;
-            }
         }
     }
+
     void EnviromentView()
     {
+        // Ищем игрока в радиусе
         Collider[] playerInRange = Physics.OverlapSphere(transform.position, viewRadius, playerMask);
-        for (int i = 0; i < playerInRange.Length; i++)
+
+        if (playerInRange.Length > 0)
         {
-            Transform player = playerInRange[i].transform;
-            Vector3 dirToPlayer = (player.position - transform.position).normalized;
-            if (Vector3.Angle(transform.forward, dirToPlayer)< viewAngle/2f)
+            Transform targetPlayer = playerInRange[0].transform;
+            Vector3 dirToPlayer = (targetPlayer.position - transform.position).normalized;
+
+            // Проверяем конус зрения (угол)
+            if (Vector3.Angle(transform.forward, dirToPlayer) < viewAngle / 2f)
             {
-                float dstToPlayer = Vector3.Distance(transform.position, player.position);
+                float dstToPlayer = Vector3.Distance(transform.position, targetPlayer.position);
+
+                // Проверяем стены (Raycast)
                 if (!Physics.Raycast(transform.position, dirToPlayer, dstToPlayer, obstacleMask))
                 {
+                    // ЗОМБИ ВИДИТ ИГРОКА ПРЯМО СЕЙЧАС
                     mPlayerInRange = true;
-                    mIsPatrol = false;
+                    mIsPatrol = false; // Включаем режим погони
+
+                    // Постоянно обновляем текущую позицию игрока
+                    mPlayerPosition = targetPlayer.position;
+                    playerLastPosition = targetPlayer.position; // Запоминаем для будущего
+                    return;
                 }
-                else
-                {
-                    mPlayerInRange = false;
-                }
-            }
-            if (Vector3.Distance(transform.position, player.position) > viewRadius)
-            {
-                mPlayerInRange = false;
             }
         }
+
+        // ЕСЛИ ЗОМБИ ДОШЕЛ СЮДА — ЗОМБИ НЕ ВИДИТ ИГРОКА ПРЯМО СЕЙЧАС (зашел за стену или убежал)
         if (mPlayerInRange)
         {
-            mPlayerPosition = player.transform.position;
+            mPlayerInRange = false;
+
+            // Запоминаем последнюю точку
+            playerLastPosition = mPlayerPosition;
+
+            // Идем проверить
+            mPlayerNear = true;
         }
     }
+
     void TryAttack()
     {
         if (Time.time - lastAttackTime < attackCooldown)
