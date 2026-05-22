@@ -17,5 +17,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Abricos.unity
     guid: a9e691107168ac1468cba58ae21b2e60
+  - enabled: 1
+    path: Assets/Scenes/Inter_Forest_TSU.unity
+    guid: 7abd4aca788e61c4381aea223470c884
+  - enabled: 1
+    path: Assets/Scenes/TSU.unity
+    guid: 0e59ed18291cdbd42a27ec632da7dd6f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 8462335c2f5c34649a6a526adbd43893, type: 3}
