@@ -23,7 +23,6 @@ public class SimpleFPSController : MonoBehaviour
     {
         if (playerCamera == null) return;
 
-        // Поворот камеры
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
@@ -32,34 +31,18 @@ public class SimpleFPSController : MonoBehaviour
         playerCamera.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         transform.Rotate(Vector3.up * mouseX);
 
-        // Движение
         float moveX = Input.GetAxis("Horizontal");
         float moveZ = Input.GetAxis("Vertical");
         Vector3 move = transform.right * moveX + transform.forward * moveZ;
         controller.Move(move * speed * Time.deltaTime);
 
-        // Прыжок
         if (controller.isGrounded && velocity.y < 0)
-        {
             velocity.y = -2f;
-        }
 
         if (Input.GetButtonDown("Jump") && controller.isGrounded)
-        {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
-        }
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
-    }
-
-    void OnTriggerStay(Collider other)
-    {
-        if (other.CompareTag("Door") && Input.GetKeyDown(KeyCode.E))
-        {
-            DoorController door = other.GetComponent<DoorController>();
-            if (door != null)
-                door.ToggleDoor();
-        }
     }
 }
