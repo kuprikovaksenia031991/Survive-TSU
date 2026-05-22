@@ -13,7 +13,6 @@ TagManager:
   - PlayerCamera
   - EnemyTrigger
   - Roommate Trigger
-  - EnemyGuard308
   layers:
   - Default
   - TransparentFX

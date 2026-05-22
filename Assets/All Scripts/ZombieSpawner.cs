@@ -2,15 +2,16 @@ using UnityEngine;
 
 public class ZombieSpawner : MonoBehaviour
 {
-    [Header("Префаб зомби (перетащишь потом)")]
-    public GameObject zombiePrefab;  // Сюда готового зомби
+    [Header("Префаб зомби")]
+    public GameObject zombiePrefab;
 
-    [Header("Настройки спавна")]
-    public int maxZombies = 3;
+    [Header("Настройки этого спавнера")]
     public float spawnInterval = 5f;
     public float spawnRadius = 3f;
 
-    private int currentZombieCount = 0;
+    [Header("Глобальные настройки (общие для всех спавнеров)")]
+    public static int totalMaxZombies = 10;  // Общий максимум зомби на всю сцену
+    private static int currentTotalZombies = 0;  // Сколько зомби сейчас всего
 
     void Start()
     {
@@ -21,19 +22,20 @@ public class ZombieSpawner : MonoBehaviour
     {
         if (zombiePrefab == null)
         {
-            Debug.LogWarning("Зомби префаб не подключён! Перетащи его в поле zombiePrefab");
+            Debug.LogWarning("Зомби префаб не подключён!");
             return;
         }
 
-        if (currentZombieCount >= maxZombies) return;
+        // Проверяем общий лимит
+        if (currentTotalZombies >= totalMaxZombies) return;
 
         Vector3 randomPos = transform.position + Random.insideUnitSphere * spawnRadius;
         randomPos.y = 0;
 
         GameObject newZombie = Instantiate(zombiePrefab, randomPos, Quaternion.identity);
-        currentZombieCount++;
+        currentTotalZombies++;
 
-        // Подписка на смерть (опционально)
+        // Подписка на смерть
         var deathScript = newZombie.GetComponent<ZombieDeathNotify>();
         if (deathScript == null)
             deathScript = newZombie.AddComponent<ZombieDeathNotify>();
@@ -42,6 +44,6 @@ public class ZombieSpawner : MonoBehaviour
 
     public void OnZombieDied()
     {
-        currentZombieCount--;
+        currentTotalZombies--;
     }
 }
