@@ -7,36 +7,20 @@ using UnityEngine.UI;
 public class ExitDoorSimple : MonoBehaviour
 {
     public string sceneToLoad = "Forest";
-    public float fadeDuration = 1f;
+    public string promptMessage = "Нажмите [E] чтобы войти";
     public float interactionDistance = 3f;
 
     private bool isTransitioning = false;
-    private CanvasGroup fadeCanvasGroup;
     private TextMeshProUGUI promptText;
 
     void Start()
     {
-        // Создаём Canvas для UI
-        GameObject canvasObj = new GameObject("ExitDoorCanvas");
+        GameObject canvasObj = new GameObject("ExitDoorCanvas_" + sceneToLoad);
         Canvas canvas = canvasObj.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvasObj.AddComponent<CanvasScaler>();
         canvasObj.AddComponent<GraphicRaycaster>();
 
-        // Панель затемнения
-        GameObject fadeObj = new GameObject("FadePanel");
-        fadeObj.transform.SetParent(canvasObj.transform, false);
-        Image fadeImage = fadeObj.AddComponent<Image>();
-        fadeImage.color = new Color(0, 0, 0, 0);
-        RectTransform fadeRect = fadeObj.GetComponent<RectTransform>();
-        fadeRect.anchorMin = Vector2.zero;
-        fadeRect.anchorMax = Vector2.one;
-        fadeRect.sizeDelta = Vector2.zero;
-        fadeImage.raycastTarget = false;
-        fadeCanvasGroup = fadeObj.AddComponent<CanvasGroup>();
-        fadeCanvasGroup.alpha = 0;
-
-        // Текст подсказки
         GameObject textObj = new GameObject("PromptText");
         textObj.transform.SetParent(canvasObj.transform, false);
         promptText = textObj.AddComponent<TextMeshProUGUI>();
@@ -59,18 +43,15 @@ public class ExitDoorSimple : MonoBehaviour
         GameObject player = GameObject.FindWithTag("Player");
         if (player == null) return;
 
-        Camera cam = player.GetComponentInChildren<Camera>();
-        if (cam == null) return;
-
         float distance = Vector3.Distance(transform.position, player.transform.position);
 
         if (distance <= interactionDistance)
         {
-            promptText.text = "Нажмите [E] чтобы покинуть общежитие";
+            promptText.text = promptMessage;
 
             if (Input.GetKeyDown(KeyCode.E))
             {
-                StartCoroutine(LoadSceneWithFade());
+                StartCoroutine(LoadScene());
             }
         }
         else
@@ -79,25 +60,19 @@ public class ExitDoorSimple : MonoBehaviour
         }
     }
 
-    IEnumerator LoadSceneWithFade()
+    IEnumerator LoadScene()
     {
         isTransitioning = true;
         promptText.text = "";
 
-        // Затемнение
-        float elapsed = 0f;
-        while (elapsed < fadeDuration)
-        {
-            elapsed += Time.deltaTime;
-            fadeCanvasGroup.alpha = Mathf.Clamp01(elapsed / fadeDuration);
-            yield return null;
-        }
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Single);
+        asyncLoad.allowSceneActivation = true;
 
-        // Загрузка сцены
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneToLoad);
         while (!asyncLoad.isDone)
         {
             yield return null;
         }
+
+        DynamicGI.UpdateEnvironment();
     }
 }
