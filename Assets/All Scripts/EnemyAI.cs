@@ -84,7 +84,14 @@ public class EnemyAI : MonoBehaviour
         }
         agent.isStopped = false;
         agent.speed = speedWalk;
-        agent.SetDestination(waypoints[mCurrentWaypointIndex].position);
+        if (waypoints != null && waypoints.Length > 0 && waypoints[mCurrentWaypointIndex] != null)
+        {
+            agent.SetDestination(waypoints[mCurrentWaypointIndex].position);
+        }
+        else
+        {
+            Debug.LogWarning("Waypoints не назначены! Зомби стоит на месте.");
+        }
 
         agent.stoppingDistance = stopDistance;
     }
@@ -136,7 +143,6 @@ public class EnemyAI : MonoBehaviour
             TryAttack();
         }
         UpdateAnimator();
-        
     }
     void UpdateAnimator()
     {

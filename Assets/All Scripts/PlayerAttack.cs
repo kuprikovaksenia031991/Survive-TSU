@@ -20,10 +20,20 @@ public class PlayerAttack : MonoBehaviour
 
     void Update()
     {
-        // Открытие двери по E
         if (Input.GetKeyDown(KeyCode.E))
         {
             InteractWithDoor();
+        }
+
+        // Тестовое убийство зомби
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            EnemyAITrigger[] allEnemies = FindObjectsOfType<EnemyAITrigger>();
+            foreach (EnemyAITrigger e in allEnemies)
+            {
+                e.TakeDamage(999);
+            }
+            Debug.Log("K нажата — урон 999 всем зомби");
         }
     }
 
@@ -84,9 +94,9 @@ public class PlayerAttack : MonoBehaviour
         switch (weaponType)
         {
             case 0:
-                damage = 15f;
+                damage = 25f;
                 attackCoolDown = 1.3f;
-                attackRange = 0.7f;
+                attackRange = 2.5f;
                 break;
             case 1:
                 damage = 50f;
