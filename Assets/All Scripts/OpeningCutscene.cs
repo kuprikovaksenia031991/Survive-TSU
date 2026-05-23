@@ -191,7 +191,7 @@ public class OpeningCutscene : MonoBehaviour
         // Подсказка подойти к соседу
         if (dialogueText != null)
         {
-            dialogueText.text = "Убейте зомби, используя ЛКМ, а затем подойдите к соседу и нажмите E для диалога";
+            dialogueText.text = "Убейте зомби, используя ЛКМ, а затем подойдите к соседу и нажмите [E] для диалога";
             dialoguePanel.SetActive(true);
         }
 
@@ -254,7 +254,7 @@ public class OpeningCutscene : MonoBehaviour
             {
                 if (string.IsNullOrEmpty(allLines[i])) continue;
 
-                dialogueText.text = allLines[i] + "\n\n<size=60%>Нажмите Е чтобы продолжить</size>";
+                dialogueText.text = allLines[i] + "\n\n<size=60%>Нажмите [E] чтобы продолжить</size>";
 
                 while (!Input.GetKeyDown(KeyCode.E))
                 {

@@ -5452,7 +5452,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -5467,15 +5467,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 218564575}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c0606b6b2f3fae43aee4a8581cd6b55, type: 3}
+  m_Script: {fileID: 11500000, guid: 3e58d2900e3b84343a9f1c01fddc0982, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   sceneToLoad: Forest
   fadeDuration: 1
-  promptPanel: {fileID: 0}
-  confirmPanel: {fileID: 0}
-  promptText: {fileID: 0}
-  confirmText: {fileID: 0}
+  interactionDistance: 3
 --- !u!1 &220223327
 GameObject:
   m_ObjectHideFlags: 0
