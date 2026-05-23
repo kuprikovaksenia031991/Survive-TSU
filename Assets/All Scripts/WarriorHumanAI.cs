@@ -16,11 +16,14 @@ public class WarriorHumanAI : MonoBehaviour
     public float health = 100f;
 
     private Transform enemy;
+    private Transform target;
     private Transform player;
     private NavMeshAgent agent;
 
     Animator animator;
 
+    private bool firstInteraction = true;
+    private float startWaitTime = 5f;
     private float lastAttackTime;
 
     void Start()
@@ -35,21 +38,39 @@ public class WarriorHumanAI : MonoBehaviour
         animator = GetComponent<Animator>();
         //начальное оружие - руки
         animator.SetInteger("WeaponType", weaponType);
+        animator.SetTrigger("Sit");
     }
 
     void Update()
     {
         if (enemy == null)
             return;
+        if (Vector3.Distance(player.position, transform.position) < (stopDistance + 3f) && firstInteraction)
+        {
+            agent.SetDestination(player.position);
+            UpdateAnimator();
 
-        // AI PATHFINDING
-        agent.SetDestination(enemy.position);
+        }
+        if (startWaitTime <= 0)
+            firstInteraction = false;
+        else
+            startWaitTime -= Time.deltaTime;
+        if (Vector3.Distance(player.position, transform.position) > 15f && !firstInteraction)
+        {
+            agent.SetDestination(player.position);
+            target = player;
 
+        }
+        else if (Vector3.Distance(enemy.position, transform.position) < 5f)
+        {
+            agent.SetDestination(enemy.position); // AI PATHFINDING
+            target = enemy;
+        }
         float distance =
             Vector3.Distance(transform.position, enemy.position);
 
         // ѕоворот к игроку
-        Vector3 lookPos = enemy.position - transform.position;
+        Vector3 lookPos = target.position - transform.position;
         lookPos.y = 0;
 
         if (lookPos != Vector3.zero)

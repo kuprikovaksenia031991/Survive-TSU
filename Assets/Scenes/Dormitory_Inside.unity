@@ -1271,6 +1271,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d57746a8ee47ae8428485dde19ab3ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyTag: 
+  isInside: 1
 --- !u!1001 &45135072
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3808,7 +3810,7 @@ NavMeshAgent:
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 0
-  m_WalkableMask: 4294967295
+  m_WalkableMask: 1
   m_ObstacleAvoidanceType: 4
 --- !u!95 &139457603 stripped
 Animator:
@@ -4614,6 +4616,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d57746a8ee47ae8428485dde19ab3ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyTag: 
+  isInside: 1
 --- !u!4 &171357034 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4380875056299614, guid: b8c3087888fc448acb63e643fea215d3, type: 3}
@@ -5824,6 +5828,7 @@ MonoBehaviour:
   timeToRotate: 2
   speedWalk: 2.7
   speedRun: 3
+  maxChaseDistance: 6
   viewRadius: 15
   viewAngle: 90
   meshResolution: 1
@@ -6834,6 +6839,7 @@ MonoBehaviour:
   timeToRotate: 2
   speedWalk: 2
   speedRun: 3
+  maxChaseDistance: 6
   viewRadius: 15
   viewAngle: 90
   meshResolution: 1
@@ -9063,7 +9069,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 8
   m_IsActive: 1
 --- !u!4 &390271041
 Transform:
@@ -11008,6 +11014,7 @@ MonoBehaviour:
   timeToRotate: 2
   speedWalk: 1.7
   speedRun: 2
+  maxChaseDistance: 6
   viewRadius: 15
   viewAngle: 90
   meshResolution: 1
@@ -13904,6 +13911,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d57746a8ee47ae8428485dde19ab3ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyTag: 
+  isInside: 1
 --- !u!1 &540815870
 GameObject:
   m_ObjectHideFlags: 0
@@ -19054,6 +19063,7 @@ MonoBehaviour:
   timeToRotate: 2
   speedWalk: 1.8
   speedRun: 2
+  maxChaseDistance: 6
   viewRadius: 15
   viewAngle: 90
   meshResolution: 1
@@ -24720,6 +24730,7 @@ MonoBehaviour:
   timeToRotate: 2
   speedWalk: 2.2
   speedRun: 2.5
+  maxChaseDistance: 6
   viewRadius: 15
   viewAngle: 90
   meshResolution: 1
@@ -26006,6 +26017,7 @@ MonoBehaviour:
   timeToRotate: 2
   speedWalk: 2.7
   speedRun: 3
+  maxChaseDistance: 6
   viewRadius: 15
   viewAngle: 90
   meshResolution: 1
@@ -27195,6 +27207,76 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1038476653}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1001 &1038620878
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5.7905073
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 6.2451644
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5.902378
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.91848576
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.39545405
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -46.589
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_Name
+      value: RoommateWarrior
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: b87560c36006a604f9d5277bdfdf9332, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 2137604003}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2137604001}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2137604005}
+  m_SourcePrefab: {fileID: 100100000, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
 --- !u!1 &1046139665
 GameObject:
   m_ObjectHideFlags: 0
@@ -28439,6 +28521,7 @@ MonoBehaviour:
   timeToRotate: 2
   speedWalk: 2
   speedRun: 2.5
+  maxChaseDistance: 6
   viewRadius: 15
   viewAngle: 90
   meshResolution: 1
@@ -30033,6 +30116,7 @@ MonoBehaviour:
   timeToRotate: 2
   speedWalk: 2.2
   speedRun: 2.5
+  maxChaseDistance: 6
   viewRadius: 15
   viewAngle: 90
   meshResolution: 1
@@ -36993,6 +37077,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d57746a8ee47ae8428485dde19ab3ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyTag: 
+  isInside: 1
 --- !u!1001 &1489407361
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -40149,6 +40235,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d57746a8ee47ae8428485dde19ab3ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyTag: 
+  isInside: 1
 --- !u!1001 &1615971656
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -42148,6 +42236,7 @@ MonoBehaviour:
   timeToRotate: 2
   speedWalk: 1.7
   speedRun: 2
+  maxChaseDistance: 6
   viewRadius: 15
   viewAngle: 90
   meshResolution: 1
@@ -47928,6 +48017,7 @@ MonoBehaviour:
   timeToRotate: 2
   speedWalk: 1
   speedRun: 1.4
+  maxChaseDistance: 6
   viewRadius: 15
   viewAngle: 90
   meshResolution: 1
@@ -49907,6 +49997,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d57746a8ee47ae8428485dde19ab3ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyTag: 
+  isInside: 1
 --- !u!1 &2017891523
 GameObject:
   m_ObjectHideFlags: 0
@@ -50477,6 +50569,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d57746a8ee47ae8428485dde19ab3ea4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyTag: 
+  isInside: 1
 --- !u!1001 &2046287327
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -53241,6 +53335,73 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2136880232}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &2137604000 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+  m_PrefabInstance: {fileID: 1038620878}
+  m_PrefabAsset: {fileID: 0}
+--- !u!195 &2137604001
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2137604000}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 1
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &2137604003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2137604000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65c371d0f557eb54281454520ee13235, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stopDistance: 1.5
+  damage: 10
+  attackCooldown: 2
+  weaponType: 0
+  health: 100
+--- !u!136 &2137604005
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2137604000}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 1.7
+  m_Direction: 1
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1001 &2137642802
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -53820,3 +53981,4 @@ SceneRoots:
   - {fileID: 331511300}
   - {fileID: 1542237308}
   - {fileID: 60096175}
+  - {fileID: 1038620878}

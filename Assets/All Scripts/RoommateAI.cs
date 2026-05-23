@@ -64,7 +64,7 @@ public class RoommateAI : MonoBehaviour
             animator.SetTrigger("Dead");
             agent.enabled = false;
         }
-            
+
     }
     void DetectPlayer()
     {
@@ -81,7 +81,7 @@ public class RoommateAI : MonoBehaviour
         startWaitTime = 1.2f;
         // Получаем forward игрока (куда смотрит игрок)
         Vector3 playerForward = player.transform.forward;
-        
+
         // Направление от игрока к боту
         Vector3 directionToRoommate = transform.position - player.transform.position;
         float distanceToRoommate = directionToRoommate.magnitude;
@@ -111,7 +111,7 @@ public class RoommateAI : MonoBehaviour
     }
     void ChaseEnemy()
     {
-        animator.SetFloat("VelX",0.5f);
+        animator.SetFloat("VelX", 0.5f);
         agent.isStopped = false;
         agent.speed = speedWalk;
         agent.SetDestination(enemy.position);
@@ -132,3 +132,4 @@ public class RoommateAI : MonoBehaviour
         Gizmos.DrawRay(player.transform.position, rightBoundary * viewDistance);
     }
 }
+
