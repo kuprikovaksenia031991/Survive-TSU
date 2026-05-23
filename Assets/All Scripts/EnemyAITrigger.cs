@@ -10,11 +10,11 @@ public class EnemyAITrigger : MonoBehaviour
     public float stopDistance = 1.5f;
 
     [Header("Combat")]
-    public float damage = 10f;
-    public float attackCooldown = 3.2f;
+    public float damage = 5f;
+    public float attackCooldown = 2f;
 
     [Header("Stats")]
-    public float health = 100f;
+    public float health = 80f;
 
     public bool isEnemyTrigger = true;
     public float startWaitTime = 4f;

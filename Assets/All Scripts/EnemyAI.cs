@@ -22,7 +22,7 @@ public class EnemyAI : MonoBehaviour
     public float timeToRotate = 2f;
     public float speedWalk = 2f;
     public float speedRun = 3f;
-    public float maxChaseDistance = 6f; // Расстояние, дальше которого от комнаты нельзя убегать
+    public float maxChaseDistance = 6f; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
     public float viewRadius = 15f;
     public float viewAngle = 90f;
@@ -75,11 +75,11 @@ public class EnemyAI : MonoBehaviour
         player = GameObject.FindWithTag("Player").transform;
 
         animator = GetComponent<Animator>();
-        animator.SetInteger("WeaponType", weaponType); //начальное оружие для зомби - укусы
+        animator.SetInteger("WeaponType", weaponType); //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅ
 
         agent = GetComponent<NavMeshAgent>();
 
-        //если противник - участник первой катсцены со студентом выбегающим из комнаты, то ему не нужно нападать на игрока пока сосед не погибнет
+        //пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (isEnemyTrigger)
         {
             agent.isStopped = true;
@@ -129,7 +129,6 @@ public class EnemyAI : MonoBehaviour
             TryAttack();
         }
         UpdateAnimator();
-
     }
     void UpdateAnimator()
     {
@@ -152,7 +151,7 @@ public class EnemyAI : MonoBehaviour
         float distanceToPlayer =
             Vector3.Distance(transform.position, player.position);
 
-        // Если слишком далеко от комнаты — возвращаемся
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         float distanceToRoom =
             Vector3.Distance(transform.position, guardRoom.position);
 
@@ -169,7 +168,7 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        // Если игрок рядом — преследуем
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         if (distanceToPlayer > stopDistance)
         {
             agent.isStopped = false;
@@ -179,7 +178,7 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            // Останавливаемся для атаки
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             agent.isStopped = true;
 
             TryAttack();
@@ -194,7 +193,7 @@ public class EnemyAI : MonoBehaviour
         agent.isStopped = false;
         agent.speed = speedWalk;
 
-        // Проверяем последнюю позицию игрока
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         if (mPlayerNear)
         {
             agent.SetDestination(playerLastPosition);
@@ -204,14 +203,14 @@ public class EnemyAI : MonoBehaviour
             {
                 mPlayerNear = false;
 
-                // Возвращаемся домой
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
                 //  agent.SetDestination(guardRoom.position);
             }
 
             return;
         }
 
-        // Просто идем домой
+        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         agent.SetDestination(guardRoom.position);
     }
 
@@ -254,23 +253,23 @@ public class EnemyAI : MonoBehaviour
     }
     void LookingPlayer(Vector3 checkPosition)
     {
-        // Приказываем зомби идти к последней известной точке игрока
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         agent.SetDestination(checkPosition);
 
-        // Если зомби почти дошел до этой точки (осталось меньше 0.5 метров)
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 0.5 пїЅпїЅпїЅпїЅпїЅпїЅ)
         if (!agent.pathPending && agent.remainingDistance <= 0.5f)
         {
-            // Зомби пришел, но игрока там нет. Он начинает "оглядываться" (ждет время mWaitTime)
+            // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ. пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ" (пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ mWaitTime)
             Stop();
             mWaitTime -= Time.deltaTime;
 
             if (mWaitTime <= 0)
             {
-                // Время ожидания вышло, зомби сдался и возвращается к обычному патрулированию
+                // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 mPlayerNear = false;
                 Move(speedWalk);
-                // GoToNextWaypoint(); // Идет к следующей точке обхода
-                mWaitTime = startWaitTime; // Сбрасываем таймер ожидания на будущее
+                // GoToNextWaypoint(); // пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+                mWaitTime = startWaitTime; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 mTimeToRotate = timeToRotate;
             }
         }
@@ -278,7 +277,7 @@ public class EnemyAI : MonoBehaviour
 
     void EnviromentView()
     {
-        // Ищем игрока в радиусе
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         Collider[] playerInRange = Physics.OverlapSphere(transform.position, viewRadius, playerMask);
 
         if (playerInRange.Length > 0)
@@ -286,35 +285,35 @@ public class EnemyAI : MonoBehaviour
             Transform targetPlayer = playerInRange[0].transform;
             Vector3 dirToPlayer = (targetPlayer.position - transform.position).normalized;
 
-            // Проверяем конус зрения (угол)
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅ)
             if (Vector3.Angle(transform.forward, dirToPlayer) < viewAngle / 2f)
             {
                 float dstToPlayer = Vector3.Distance(transform.position, targetPlayer.position);
 
-                // Проверяем стены (Raycast)
+                // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (Raycast)
                 if (!Physics.Raycast(transform.position, dirToPlayer, dstToPlayer, obstacleMask))
                 {
-                    // ЗОМБИ ВИДИТ ИГРОКА ПРЯМО СЕЙЧАС
+                    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
                     mPlayerInRange = true;
-                    mIsPatrol = false; // Включаем режим погони
+                    mIsPatrol = false; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 
-                    // Постоянно обновляем текущую позицию игрока
+                    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
                     mPlayerPosition = targetPlayer.position;
-                    playerLastPosition = targetPlayer.position; // Запоминаем для будущего
+                    playerLastPosition = targetPlayer.position; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                     return;
                 }
             }
         }
 
-        // ЕСЛИ ЗОМБИ ДОШЕЛ СЮДА — ЗОМБИ НЕ ВИДИТ ИГРОКА ПРЯМО СЕЙЧАС (зашел за стену или убежал)
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)
         if (mPlayerInRange)
         {
             mPlayerInRange = false;
 
-            // Запоминаем последнюю точку
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
             playerLastPosition = mPlayerPosition;
 
-            // Идем проверить
+            // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
             mPlayerNear = true;
         }
     }
@@ -331,7 +330,7 @@ public class EnemyAI : MonoBehaviour
         {
             stats.TakeDamage(damage);
 
-            Debug.Log("ВРАГ БЬЁТ! Урон: " + damage);
+            Debug.Log("пїЅпїЅпїЅпїЅ пїЅЬЁпїЅ! пїЅпїЅпїЅпїЅ: " + damage);
 
             lastAttackTime = Time.time;
         }
@@ -342,9 +341,9 @@ public class EnemyAI : MonoBehaviour
         health -= dmg;
 
         Debug.Log(
-            "Враг получил урон: " +
+            "пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ: " +
             dmg +
-            ". HP врага: " +
+            ". HP пїЅпїЅпїЅпїЅпїЅ: " +
             health
         );
 
@@ -356,7 +355,7 @@ public class EnemyAI : MonoBehaviour
 
     void Die()
     {
-        Debug.Log("ВРАГ УБИТ!");
+        Debug.Log("пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ!");
 
         agent.enabled = false;
 
