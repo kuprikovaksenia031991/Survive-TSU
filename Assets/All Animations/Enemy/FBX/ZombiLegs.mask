@@ -6,8 +6,8 @@ AvatarMask:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ZombiAttackMask
-  m_Mask: 00000000010000000100000000000000000000000100000001000000010000000100000000000000000000000100000001000000
+  m_Name: ZombiLegs
+  m_Mask: 01000000000000000000000001000000010000000000000000000000000000000000000001000000010000000000000000000000
   m_Elements:
   - m_Path: 
     m_Weight: 1
@@ -16,7 +16,7 @@ AvatarMask:
   - m_Path: Zombie/Hips
     m_Weight: 1
   - m_Path: Zombie/Hips/LeftUpLeg
-    m_Weight: 0
+    m_Weight: 1
   - m_Path: Zombie/Hips/LeftUpLeg/LeftLeg
     m_Weight: 1
   - m_Path: Zombie/Hips/LeftUpLeg/LeftLeg/LeftFoot
@@ -28,7 +28,7 @@ AvatarMask:
   - m_Path: Zombie/Hips/LeftUpLeg/LeftLeg/LeftFoot/LeftToeBase/LeftToe_End/LeftToe_End_end
     m_Weight: 1
   - m_Path: Zombie/Hips/RightUpLeg
-    m_Weight: 0
+    m_Weight: 1
   - m_Path: Zombie/Hips/RightUpLeg/RightLeg
     m_Weight: 1
   - m_Path: Zombie/Hips/RightUpLeg/RightLeg/RightFoot
@@ -110,4 +110,4 @@ AvatarMask:
   - m_Path: Zombie/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2/RightHandThumb3/RightHandThumb4/RightHandThumb4_end
     m_Weight: 1
   - m_Path: Zombie_Cylinder
-    m_Weight: 0
+    m_Weight: 1

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -7,23 +8,29 @@ public class RoommateAI : MonoBehaviour
 {
     // Start is called before the first frame update
     public float speedWalk = 3f;
-    public float startWaitTime = 1f;
+    public float startWaitTime = 4f;
     public float distanceToDie = 3f;
     private int countDoorOpen = 0;
-    private bool playerDetected = false;
+    public bool playerDetected = false;
+    bool wokeUp = false;
+    public float sitDownOffset = 0.8f; // насколько садится вниз
+    public float sitMoveTime = 0.4f;   // скорость присаживания
+    public float sitTime = 1f;       // сколько сидит
+    public float jumpForward = 0.3f;   // насколько спрыгивает вправо
+    public float jumpTime = 0.4f;      // скорость спрыгивания
 
     public DoorController door;
     public NavMeshAgent agent;
-    public Animator animator;
+    public Animator animator; // для всей анимации
     private Transform player;
     private Transform enemy;
 
-    //��� ���������� �������� �������
+    //��� ���������� �������� �������
     public AnimationFix animFix;
 
     [Header("Vision Settings")]
     public float viewDistance = 15f;
-    public float viewAngle = 90f;
+    public float viewAngle = 45f;
     public LayerMask playerLayer;
     public LayerMask obstacleLayer;
 
@@ -33,23 +40,31 @@ public class RoommateAI : MonoBehaviour
         player = GameObject.FindWithTag("Player").transform;
         enemy = GameObject.FindWithTag("EnemyTrigger").transform;
         agent = GetComponent<NavMeshAgent>();
+        agent.enabled = false; //отключаем физику во время сна
+
         animator = GetComponent<Animator>();
-        animator.SetTrigger("Sit");
+        animator.SetTrigger("Dead"); // для видимости сна бота
+
         animFix = GetComponent<AnimationFix>();
+        animFix.OnDead(); // отключаем коллидер во время сна
     }
 
     // Update is called once per frame
     void Update()
     {
         DetectPlayer();
+        if (playerDetected && !wokeUp)
+        {
+            AnimationTrigger(); // бот просыпается
+            StartCoroutine(EnableAgent()); //появляется физика(вместес ней навигация ии)
+        }
 
-        if (playerDetected && countDoorOpen <= 1)
+        if (playerDetected && countDoorOpen <= 1 && agent.enabled && agent.isOnNavMesh)
         {
             ChaseEnemy();
             if (startWaitTime <= 0)
             {
                 door.ToggleDoor();
-                countDoorOpen += 1;
                 startWaitTime = 4.8f;
             }
             else
@@ -59,78 +74,118 @@ public class RoommateAI : MonoBehaviour
         }
         if (Vector3.Distance(enemy.position, transform.position) <= distanceToDie)
         {
-            animFix.OnDead();
-            transform.position += new Vector3(-1f, 0f, 0f);
-            animator.SetTrigger("Dead");
-            agent.enabled = false;
+            Die();
         }
 
     }
     void DetectPlayer()
     {
-        if (player == null)
-        {
-            player = GameObject.FindWithTag("Player").transform;
-            return;
-        }
+        if (player == null) return;
+        if (playerDetected) return;
         if (startWaitTime > 0)
         {
             startWaitTime -= Time.deltaTime;
             return;
         }
-        startWaitTime = 1.2f;
-        // �������� forward ������ (���� ������� �����)
-        Vector3 playerForward = player.transform.forward;
-
-        // ����������� �� ������ � ����
-        Vector3 directionToRoommate = transform.position - player.transform.position;
-        float distanceToRoommate = directionToRoommate.magnitude;
-
-        // ��������� ���������
-        if (distanceToRoommate > viewDistance) return;
-
-        // ��������� ���� (���� ������)
-        float angle = Vector3.Angle(playerForward, directionToRoommate);
-        if (angle > viewAngle / 2f) return;
-
-        // ��������� ���� �� ����������� ����� ������� � �����
-        if (Physics.Raycast(player.transform.position + Vector3.up,
-            directionToRoommate.normalized, distanceToRoommate, obstacleLayer))
+        // Расстояние от игрока до бота
+        Vector3 directionToBot = transform.position - player.position; //направление от игрока к боту
+        float distanceToPlayer = directionToBot.magnitude;
+        directionToBot.y = 0; // убираем разницу высоты (это не важно)
+        // находится ли бот в пределах видимости по расстоянию
+        if (distanceToPlayer > viewDistance)
         {
             playerDetected = false;
-            return; // ����� ������
+            return;
         }
+        // находится ли бот в пределах видимости по направлению взгляда
+        float angleToPlayer = Vector3.Angle(player.forward, directionToBot.normalized);
 
-        // ����� ���������!
-        if (!playerDetected)
+        if (angleToPlayer > viewAngle / 2f)
         {
-            playerDetected = true;
-            animator.SetTrigger("StandUp");
-            Debug.Log("Roommate");
+            playerDetected = false;
+            return;
         }
+        playerDetected = true;
     }
     void ChaseEnemy()
     {
-        animator.SetFloat("VelX", 0.5f);
+        if (!agent.enabled || !agent.isOnNavMesh)
+    {
+        if (NavMesh.SamplePosition(transform.position + Vector3.right * 1f, out NavMeshHit hit, 3f, NavMesh.AllAreas))
+            agent.Warp(hit.position);
+        return;
+    }
+        animator.SetFloat("VelX", 0.7f);
         agent.isStopped = false;
         agent.speed = speedWalk;
         agent.SetDestination(enemy.position);
     }
-    void OnDrawGizmos()
+
+    void AnimationTrigger()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null) return;
-
-        Gizmos.color = playerDetected ? Color.red : Color.green;
-
-        // ���������� ���� ������ ������
-        Vector3 playerForward = player.transform.forward;
-        Vector3 leftBoundary = Quaternion.Euler(0, -viewAngle / 2, 0) * playerForward;
-        Vector3 rightBoundary = Quaternion.Euler(0, viewAngle / 2, 0) * playerForward;
-
-        Gizmos.DrawRay(player.transform.position, leftBoundary * viewDistance);
-        Gizmos.DrawRay(player.transform.position, rightBoundary * viewDistance);
+        animFix.OnRespawn();
+        animator.SetTrigger("Sit");
+        wokeUp = true;
     }
+    void Die()
+    {
+        animFix.OnDead(); // убираем физику
+        animator.SetTrigger("Dead");
+
+        agent.enabled = false;
+
+        //отключаем скрипт бота чтобы не обновлять его после смерти
+        this.enabled = false;
+    }
+
+    //принудительный пропуск кадров для корректной анимации вставания
+    IEnumerator EnableAgent()
+{
+    // сразу при пробуждении: садим попой на кровать (вниз) + поворот
+    Vector3 sitStart = transform.position;
+    Vector3 sitTarget = sitStart + Vector3.down * sitDownOffset; // садится вниз
+    sitTarget += Vector3.right * 1f; // сдвиг по X в плюс при посадке
+    Quaternion startRot = transform.rotation;
+    Quaternion targetRot = Quaternion.LookRotation(Vector3.right); // поворот вправо
+
+    float t = 0;
+    while (t < 1f)
+    {
+        t += Time.deltaTime / sitMoveTime;
+        transform.position = Vector3.Lerp(sitStart, sitTarget, t);
+        transform.rotation = Quaternion.Slerp(startRot, targetRot, t);
+        yield return null;
+    }
+
+    yield return new WaitForSeconds(sitTime); // сидит на кровати
+    // плавно опускается ещё на 0.4f вниз перед вставанием
+    Vector3 downStart = transform.position;
+    Vector3 downTarget = downStart + Vector3.down * 0.4f;
+    float td = 0;
+    while (td < 1f)
+    {
+        td += Time.deltaTime / sitMoveTime;
+        transform.position = Vector3.Lerp(downStart, downTarget, td);
+        yield return null;
+    }
+    yield return new WaitForSeconds(0.1f); // ждём перед вставанием
+    animator.SetTrigger("StandUp");
+    // вставание: спрыгивает вправо и на пол
+    Vector3 jumpStart = transform.position;
+    Vector3 jumpTarget = jumpStart + Vector3.right * jumpForward; // спрыгивает вправо
+    t = 0;
+    while (t < 1f)
+    {
+        t += Time.deltaTime / jumpTime;
+        transform.position = Vector3.Lerp(jumpStart, jumpTarget, t);
+        yield return null;
+    }
+
+    agent.enabled = true;
+    yield return null;
+    if (agent.isOnNavMesh) ChaseEnemy();
 }
+}
+
 
 

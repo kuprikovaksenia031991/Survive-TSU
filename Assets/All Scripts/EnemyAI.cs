@@ -23,6 +23,7 @@ public class EnemyAI : MonoBehaviour
     public float speedWalk = 2f;
     public float speedRun = 3f;
     public float maxChaseDistance = 6f; // Расстояние, дальше которого от комнаты нельзя убегать
+    float distanceToRoom = 0;
 
     public float viewRadius = 15f;
     public float viewAngle = 90f;
@@ -95,22 +96,24 @@ public class EnemyAI : MonoBehaviour
 
     void Update()
     {
-
-        float distanceToRoom = Vector3.Distance(transform.position, guardRoom.position);
-        if (!mIsPatrol && distanceToRoom > maxChaseDistance && guardRoom != null)
+        if (guardRoom != null)
         {
-            mIsPatrol = true;
+            distanceToRoom = Vector3.Distance(transform.position, guardRoom.position);
+        }
+        if (guardRoom != null && !mIsPatrol)
+        {
+            if (distanceToRoom > maxChaseDistance)
+            {
+                mIsPatrol = true;
+                mPlayerInRange = false;
+                mPlayerNear = false;
+                mCaughtPlayer = false;
 
-            mPlayerInRange = false;
-            mPlayerNear = false;
-            mCaughtPlayer = false;
-
-            agent.isStopped = false;
-            agent.speed = speedWalk;
-
-            agent.SetDestination(guardRoom.position);
-
-            return;
+                agent.isStopped = false;
+                agent.speed = speedRun;
+                agent.SetDestination(guardRoom.position);
+                return;
+            }
         }
         EnviromentView();
         if (!mIsPatrol)
