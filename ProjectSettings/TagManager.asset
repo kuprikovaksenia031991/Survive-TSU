@@ -13,11 +13,12 @@ TagManager:
   - PlayerCamera
   - EnemyTrigger
   - Roommate Trigger
+  - EnemyGuard308
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Enemy
   - Water
   - UI
   - PlayerBody

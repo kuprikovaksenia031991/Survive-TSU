@@ -1,12 +1,13 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerAttack : MonoBehaviour
 {
     public int weaponType = 0;
-    private float damage = 15f;
-    private float attackCoolDown = 0.7f;
+    private float damage = 30f;
+    private float attackCoolDown = 0.5f;
     private float lastAttackTime;
-    private float attackRange = 3f;
+    private float attackRange = 4f;
 
     [Header("References")]
     public Camera playerCamera;
@@ -25,7 +26,7 @@ public class PlayerAttack : MonoBehaviour
             InteractWithDoor();
         }
 
-        // Тестовое убийство зомби
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         if (Input.GetKeyDown(KeyCode.K))
         {
             EnemyAITrigger[] allEnemies = FindObjectsOfType<EnemyAITrigger>();
@@ -33,30 +34,42 @@ public class PlayerAttack : MonoBehaviour
             {
                 e.TakeDamage(999);
             }
-            Debug.Log("K нажата — урон 999 всем зомби");
+            Debug.Log("K пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ 999 пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ");
         }
     }
 
     public void Attack()
-    {
-        if (Time.time - lastAttackTime < attackCoolDown)
-            return;
+{
+    if (Time.time - lastAttackTime < attackCoolDown)
+        return;
 
-        RaycastHit hit;
-        if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, attackRange))
-        {
-            if (hit.transform.CompareTag("Enemy"))
+    RaycastHit hit;
+    if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, attackRange))
+    {
+       
+            // РР©Р•Рњ EnemyAI РќРђ Р’РЎР•Рњ РџРЈРўР Р’Р’Р•Р РҐ
+            EnemyAI enemy = hit.transform.GetComponentInParent<EnemyAI>();
+            
+            if (enemy != null)
             {
-                EnemyAI enemy = hit.transform.GetComponent<EnemyAI>();
-                if (enemy != null)
-                {
-                    enemy.TakeDamage(damage);
-                }
+                enemy.TakeDamage(damage);
+                Debug.Log("РЈР РћРќ РџР РћРЁРЃР›! Enemy: " + enemy.name + " РЈСЂРѕРЅ: " + damage);
             }
-        }
-        lastAttackTime = Time.time;
-        animator.SetTrigger("Attack");
+            else
+    {
+        Debug.Log("Raycast РЅРµ РїРѕРїР°Р» РЅРё РІРѕ С‡С‚Рѕ");
     }
+        }
+        else
+        {
+            Debug.Log("РџРѕРїР°Р» РІ: " + hit.transform.name + " С‚РµРі: " + hit.transform.tag);
+        }
+    
+    
+    
+    lastAttackTime = Time.time;
+    animator.SetTrigger("Attack");
+}
 
     public void InteractWithDoor()
     {

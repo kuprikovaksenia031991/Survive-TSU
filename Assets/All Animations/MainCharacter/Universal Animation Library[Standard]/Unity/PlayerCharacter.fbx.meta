@@ -13,12 +13,17 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Legs
-    second: {fileID: -5637652675625914632, guid: 4615b9c618ae98248a702a96e5bd7468, type: 3}
+    second: {fileID: 2100000, guid: ebbdcbc208032d0469e2da75899d4685, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Shirt
+    second: {fileID: 2100000, guid: ebbdcbc208032d0469e2da75899d4685, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Shoes
-    second: {fileID: 4217796364934669478, guid: b53389db0b44b72478f3ff2337a99efd, type: 3}
+    second: {fileID: 2100000, guid: ebbdcbc208032d0469e2da75899d4685, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

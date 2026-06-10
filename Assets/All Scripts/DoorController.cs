@@ -13,8 +13,8 @@ public class DoorController : MonoBehaviour
     private bool _isOpen;
     private Quaternion _closedRot, _openRot;
 
-    // NavMeshLink – «мост», который появляется/исчезает
-    private NavMeshLink _link;
+    // Вместо NavMeshLink используем NavMeshObstacle
+    private NavMeshObstacle _obstacle;
 
     void Awake()
     {
@@ -23,18 +23,15 @@ public class DoorController : MonoBehaviour
         _closedRot = transform.localRotation;
         _openRot = _closedRot * Quaternion.Euler(0f, openAngle, 0f);
 
-        // создаём линк, если его нет в иерархии
-        _link = GetComponent<NavMeshLink>();
-        if (_link == null)
-            _link = gameObject.AddComponent<NavMeshLink>();
+        // Добавляем NavMeshObstacle, если его нет
+        _obstacle = GetComponent<NavMeshObstacle>();
+        if (_obstacle == null)
+            _obstacle = gameObject.AddComponent<NavMeshObstacle>();
 
-        // указываем размеры – они должны покрывать проём двери
-        _link.startPoint = new Vector3(0f, 0f, -0.5f);
-        _link.endPoint = new Vector3(0f, 2f, -0.5f);
-        _link.width = 1f;
-        _link.costModifier = -1; // обычная стоимость
-        _link.autoUpdate = true;  // линк будет следовать за трансформом
-        _link.enabled = false;    // изначально закрыта → линк выключен
+        // Настройка препятствия
+        _obstacle.carving = true; // ВАЖНО: Carving вырезает дыру в NavMesh
+        _obstacle.enabled = true;  // Изначально закрыта -> препятствие активно
+    
     }
 
     void Update()
@@ -51,10 +48,13 @@ public class DoorController : MonoBehaviour
     {
         _isOpen = !_isOpen;
 
-        // включаем/выключаем линк
-        _link.enabled = _isOpen;
+        // Управляем препятствием: если дверь открыта, препятствие выключается
+        if (_obstacle != null)
+        {
+            _obstacle.enabled = !_isOpen;
+        }
 
-        // обычный коллайдер двери (чтобы физика не пропускала персонажа)
+        // Обычный коллайдер для физики игрока
         var col = GetComponent<Collider>();
         if (col) col.enabled = !_isOpen;
 

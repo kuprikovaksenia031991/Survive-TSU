@@ -1,23 +1,39 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEngine.InputSystem.XR;
+using UnityEditor.UI;
+using UnityEngine.UI;
+using TMPro;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyAI : MonoBehaviour
 {
+    private Vector3 uiOffset = new Vector3(0, 2.5f, 0); // Выше головы врага
+    // UI and for UI
+    private int maxEnemies = 4;
+    private int currentEnemies = 0;
+    private Slider hpSlider;
+private CanvasGroup canvasGroup;
+private float damageTimer;
+private float hideDelay = 3f;
+    // Spawner
+    private GameObject enemyPrefab;
+    [SerializeField] private Transform enemyParent;
+
+
     [Header("Movement")]
     public float stopDistance = 1.5f;
 
     [Header("Combat")]
-    public float damage = 10f;
+    public float damage = 7f;
     public float attackCooldown = 3.2f;
 
     [Header("Stats")]
     public float health = 100f;
 
     public bool isEnemyTrigger = false;
+    public bool isEnemySpawn = false;
     public float startWaitTime = 4f;
     public float timeToRotate = 2f;
     public float speedWalk = 2f;
@@ -44,12 +60,23 @@ public class EnemyAI : MonoBehaviour
     private bool mIsPatrol = true;
     private bool mCaughtPlayer;
 
+    private float maxHP = 100f;
+    private float currentHP;
+
     private Transform player;
+    private Transform enemyHead;
     private NavMeshAgent agent;
 
     public Transform guardRoom;
     //public DoorController temporaryDoor;
     public string enemyTag;
+    [Header("Effects")]
+    public float knockbackForce = 3f;
+    public float flashDuration = 0.1f;
+    // Вспышка при ударе
+    private Material bodyMaterial;
+    private Color originalColor;
+    private float flashTimer;
 
     public LayerMask playerMask;
     public LayerMask obstacleMask;
@@ -58,11 +85,23 @@ public class EnemyAI : MonoBehaviour
 
     public int weaponType = 0;
     private float lastAttackTime;
+    
+    // Эффекты полоски HP
+private Image glowImage;
+private Image damageFlashImage;
+private Color originalFillColor;
+private float glowTimer;
+private float glowDuration = 0.3f;
+private float damageFlashTimer;
+private float damageFlashDuration = 0.15f;
+   
 
     void Start()
     {
+        CreateHPBar();
         //temporaryDoor.ToggleDoor();
         enemyTag = transform.tag;
+        currentHP = maxHP;
 
         mPlayerPosition = Vector3.zero;
         mIsPatrol = true;
@@ -96,6 +135,19 @@ public class EnemyAI : MonoBehaviour
 
     void Update()
     {
+        if (canvasGroup != null && canvasGroup.alpha <= 0)
+        canvasGroup.alpha = 1f;
+
+        // Таймер скрытия HP
+        if (damageTimer > 0)
+    {
+        damageTimer -= Time.deltaTime;
+        if (damageTimer <= 0 && canvasGroup != null)
+            canvasGroup.alpha = 0f;
+    }
+        if (enemyHead != null)
+            transform.position = enemyHead.position + Vector3.up * 0.01f;
+
         if (guardRoom != null)
         {
             distanceToRoom = Vector3.Distance(transform.position, guardRoom.position);
@@ -132,7 +184,26 @@ public class EnemyAI : MonoBehaviour
             TryAttack();
         }
         UpdateAnimator();
-
+        // Эффект подсветки (Glow)
+    if (glowTimer > 0 && glowImage != null)
+    {
+        glowTimer -= Time.deltaTime;
+        float alpha = glowTimer / glowDuration;
+        glowImage.color = new Color(1f, 0.5f, 0f, alpha * 0.8f);
+    }
+    
+    // Эффект вспышки урона
+    if (damageFlashTimer > 0 && damageFlashImage != null)
+    {
+        damageFlashTimer -= Time.deltaTime;
+        float alpha = damageFlashTimer / damageFlashDuration;
+        damageFlashImage.color = new Color(1f, 1f, 0f, alpha);
+        
+        if (damageFlashTimer <= 0)
+        {
+            damageFlashImage.color = new Color(1f, 1f, 0f, 0f);
+        }
+    }
     }
     void UpdateAnimator()
     {
@@ -190,8 +261,14 @@ public class EnemyAI : MonoBehaviour
             TryAttack();
         }
     }
-
-    private void Patrolling()
+void LateUpdate()
+{
+    if (hpSlider != null)
+    {
+        // Позиция над головой врага
+        hpSlider.transform.position = transform.position + Vector3.up * 2.5f;
+    }
+}    private void Patrolling()
     {
         agent.isStopped = false;
         agent.speed = speedWalk;
@@ -213,7 +290,7 @@ public class EnemyAI : MonoBehaviour
             return;
         }
         if (guardRoom != null)
-        // Просто идем домой
+            // Просто идем домой
             agent.SetDestination(guardRoom.position);
     }
 
@@ -340,28 +417,168 @@ public class EnemyAI : MonoBehaviour
     }
 
     public void TakeDamage(float dmg)
+{
+    currentHP -= dmg; // ИСПРАВЛЁНО: было damage, должно быть dmg
+    currentHP = Mathf.Max(0, currentHP);
+    
+    // КРОВЬ
+    if (BloodEffect.Instance != null)
     {
-        health -= dmg;
-
-        Debug.Log(
-            "Враг получил урон: " +
-            dmg +
-            ". HP врага: " +
-            health
-        );
-
-        if (health <= 0)
-        {
-            Die();
-        }
+        Vector3 bloodPos = transform.position + Vector3.up * 1.5f;
+        BloodEffect.Instance.SpawnBlood(bloodPos);
     }
+    
+    // Вспышка
+    if (bodyMaterial != null)
+    {
+        bodyMaterial.color = Color.red;
+        flashTimer = flashDuration;
+    }
+    if (hpSlider != null)
+            hpSlider.value = currentHP / maxHP; // НОРМАЛИЗОВАТЬ 0-1
+    
+    // Показать полоску HP
+    if (canvasGroup != null)
+    {
+        canvasGroup.alpha = 1;
+        damageTimer = hideDelay;
+    }
+
+    if (currentHP <= 0)
+        Die();
+}
 
     void Die()
     {
+        animator.SetTrigger("IsDead");
         Debug.Log("ВРАГ УБИТ!");
 
         agent.enabled = false;
 
-        Destroy(gameObject);
+        Destroy(gameObject, 5f);
+        FindObjectOfType<EnemyAI>()?.EnemyDiedCounter();
+
+        if (isEnemySpawn)
+        {
+            Vector3 posDied = transform.position;
+            Invoke(nameof(SpawnEnemyDelayed), 15f);
+        }
     }
+    public void EnemyDiedCounter()
+    {
+        currentEnemies--;
+    }
+    // Spawner
+    void SpawnEnemyDelayed()
+    {
+        SpawnEnemy(transform.position);
+    }
+    public void SpawnEnemy(Vector3 position)
+    {
+        if (currentEnemies >= maxEnemies)
+        {
+            Debug.Log("Максимум врагов!");
+            return;
+        }
+
+        GameObject enemyNew = Instantiate(enemyPrefab, position, Quaternion.identity, enemyParent);
+        currentEnemies++;
+     
+    }
+    void CreateHPBar()
+{
+    // Создаём HPBar
+    GameObject hpBar = new GameObject("HPBar");
+    hpBar.transform.SetParent(transform);
+    hpBar.transform.localPosition = new Vector3(0, 2.5f, 0);
+
+    // Canvas
+    Canvas canvas = hpBar.AddComponent<Canvas>();
+    canvas.renderMode = RenderMode.WorldSpace;
+    canvas.worldCamera = Camera.main;
+    canvas.sortingOrder = 10;
+
+    CanvasScaler scaler = hpBar.AddComponent<CanvasScaler>();
+    scaler.dynamicPixelsPerUnit = 100;
+
+    // CanvasGroup
+    canvasGroup = hpBar.AddComponent<CanvasGroup>();
+
+    // Slider объект
+    GameObject sliderObj = new GameObject("Slider");
+    sliderObj.transform.SetParent(hpBar.transform);
+    sliderObj.transform.localPosition = Vector3.zero;
+    sliderObj.transform.localScale = new Vector3(1, 1, 1);
+
+    RectTransform sliderRT = sliderObj.AddComponent<RectTransform>();
+    sliderRT.sizeDelta = new Vector2(0.5f, 0.05f);
+
+    // Slider component
+    hpSlider = sliderObj.AddComponent<Slider>();
+
+    // Background
+    GameObject bg = new GameObject("Background");
+    bg.transform.SetParent(sliderObj.transform);
+    bg.transform.localPosition = Vector3.zero;
+    RectTransform bgRT = bg.AddComponent<RectTransform>();
+    bgRT.sizeDelta = new Vector2(0.5f, 0.05f);
+    bgRT.anchoredPosition = Vector2.zero;
+    Image bgImg = bg.AddComponent<Image>();
+    bgImg.color = new Color(0.3f, 0f, 0f, 0.8f);
+
+    // Fill Area
+    GameObject fillArea = new GameObject("Fill Area");
+    fillArea.transform.SetParent(sliderObj.transform);
+    fillArea.transform.localPosition = Vector3.zero;
+    RectTransform faRT = fillArea.AddComponent<RectTransform>();
+    faRT.sizeDelta = new Vector2(0.5f, 0.05f);
+    faRT.anchoredPosition = Vector2.zero;
+
+    // Fill (основной)
+    GameObject fill = new GameObject("Fill");
+    fill.transform.SetParent(fillArea.transform);
+    fill.transform.localPosition = Vector3.zero;
+    RectTransform fillRT = fill.AddComponent<RectTransform>();
+    fillRT.sizeDelta = new Vector2(0.5f, 0.05f);
+    fillRT.anchoredPosition = Vector2.zero;
+    Image fillImg = fill.AddComponent<Image>();
+    fillImg.color = new Color(0.8f, 0f, 0f, 1f);
+
+    // ===== GLOW EFFECT (подсветка) =====
+    GameObject glow = new GameObject("Glow");
+    glow.transform.SetParent(fillArea.transform);
+    glow.transform.localPosition = Vector3.zero;
+    RectTransform glowRT = glow.AddComponent<RectTransform>();
+    glowRT.sizeDelta = new Vector2(0.5f, 0.05f);
+    glowRT.anchoredPosition = Vector2.zero;
+    Image glowImg = glow.AddComponent<Image>();
+    glowImg.color = new Color(1f, 0.5f, 0f, 0f);
+
+    // ===== DAMAGE FLASH (вспышка урона) =====
+    GameObject damageFlash = new GameObject("DamageFlash");
+    damageFlash.transform.SetParent(sliderObj.transform);
+    damageFlash.transform.localPosition = Vector3.zero;
+    RectTransform dfRT = damageFlash.AddComponent<RectTransform>();
+    dfRT.sizeDelta = new Vector2(0.5f, 0.05f);
+    dfRT.anchoredPosition = Vector2.zero;
+    Image dfImg = damageFlash.AddComponent<Image>();
+    dfImg.color = new Color(1f, 1f, 0f, 0f);
+
+    // Slider settings
+    hpSlider.fillRect = fillRT;
+    hpSlider.targetGraphic = fillImg;
+    hpSlider.direction = Slider.Direction.LeftToRight;
+    hpSlider.minValue = 0;
+    hpSlider.maxValue = 1;
+    hpSlider.value = 1;
+
+    // Скрыть по умолчанию
+    canvasGroup.alpha = 0;
+    canvasGroup.blocksRaycasts = false;
+    
+    // Сохраняем ссылки для эффектов
+    glowImage = glowImg;
+    damageFlashImage = dfImg;
+    originalFillColor = fillImg.color;
+}
 }
