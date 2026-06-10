@@ -16,6 +16,9 @@ public class DoorController : MonoBehaviour
     // NavMeshLink – «мост», который появляется/исчезает
     private NavMeshLink _link;
 
+    // Свойство для доступа к состоянию двери 
+    public bool IsOpen => _isOpen;
+
     void Awake()
     {
         _asrc = GetComponent<AudioSource>();
@@ -61,5 +64,7 @@ public class DoorController : MonoBehaviour
         // звук
         _asrc.clip = _isOpen ? openClip : closeClip;
         _asrc.Play();
+
+        Debug.Log($"Дверь {gameObject.name}: {(_isOpen ? "открыта" : "закрыта")}");
     }
 }

@@ -6,44 +6,53 @@ public class ZombieSpawner : MonoBehaviour
     public GameObject zombiePrefab;
 
     [Header("Настройки этого спавнера")]
-    public float spawnInterval = 5f;
-    public float spawnRadius = 3f;
+    public int zombiesToSpawn = 3;        // Сколько зомби выйдет из этого спавнера
+    public float spawnDelay = 2f;         // Задержка перед первым спавном
+    public float spawnInterval = 3f;      // Интервал между спавнами
 
-    [Header("Глобальные настройки (общие для всех спавнеров)")]
-    public static int totalMaxZombies = 10;  // Общий максимум зомби на всю сцену
-    private static int currentTotalZombies = 0;  // Сколько зомби сейчас всего
+    private int spawnedCount = 0;
+    private bool isSpawning = true;
 
     void Start()
     {
-        InvokeRepeating("TrySpawn", 1f, spawnInterval);
+        InvokeRepeating("TrySpawn", spawnDelay, spawnInterval);
     }
 
     void TrySpawn()
     {
+        if (!isSpawning) return;
         if (zombiePrefab == null)
         {
             Debug.LogWarning("Зомби префаб не подключён!");
             return;
         }
 
-        // Проверяем общий лимит
-        if (currentTotalZombies >= totalMaxZombies) return;
+        if (spawnedCount >= zombiesToSpawn)
+        {
+            isSpawning = false;
+            CancelInvoke("TrySpawn");
+            Debug.Log($"Спавнер {gameObject.name} завершил работу, выпущено {spawnedCount} зомби");
+            return;
+        }
 
-        Vector3 randomPos = transform.position + Random.insideUnitSphere * spawnRadius;
+        Vector3 randomPos = transform.position + Random.insideUnitSphere * 2f;
         randomPos.y = 0;
 
         GameObject newZombie = Instantiate(zombiePrefab, randomPos, Quaternion.identity);
-        currentTotalZombies++;
+        spawnedCount++;
 
-        // Подписка на смерть
+        // Добавляем компонент для уведомления о смерти (если нет)
         var deathScript = newZombie.GetComponent<ZombieDeathNotify>();
         if (deathScript == null)
             deathScript = newZombie.AddComponent<ZombieDeathNotify>();
         deathScript.Init(this);
+
+        Debug.Log($"Спавнер {gameObject.name}: выпущен зомби {spawnedCount}/{zombiesToSpawn}");
     }
 
     public void OnZombieDied()
     {
-        currentTotalZombies--;
+        // Можно добавить логику, если нужно
+        Debug.Log($"Зомби из спавнера {gameObject.name} умер");
     }
 }

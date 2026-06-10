@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 public class SimpleFPSControllers : MonoBehaviour
@@ -14,6 +14,12 @@ public class SimpleFPSControllers : MonoBehaviour
     [Header("Jump Buffer (seconds)")]
     [SerializeField] private float jumpBufferTime = 0.1f;
 
+    [Header("Crouch")]
+    public float crouchHeight = 1f;
+    public float standingHeight = 1.8f;
+    public float crouchSpeed = 2f;
+    public float crouchTransitionSpeed = 10f;
+
     private Transform playerCamera;
     private CharacterController controller;
     private float xRotation = 0f;
@@ -22,7 +28,7 @@ public class SimpleFPSControllers : MonoBehaviour
     [Header("Animator")]
     [SerializeField] private Animator animator;
 
-    // Состояния
+    // РЎРѕСЃС‚РѕСЏРЅРёСЏ
     private bool isDead = false;
     private bool isGrounded;
     private bool isAttacking = false;
@@ -33,6 +39,11 @@ public class SimpleFPSControllers : MonoBehaviour
     private float jumpBufferCounter = 0f;
     private bool jumpConsumed = true;
 
+    // РџСЂРёСЃРµРґР°РЅРёРµ
+    private bool isCrouching = false;
+    private float originalHeight;
+    private float originalSpeed;
+    private float targetHeight;
 
     void Start()
     {
@@ -43,13 +54,21 @@ public class SimpleFPSControllers : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        // РЎРѕС…СЂР°РЅСЏРµРј РѕСЂРёРіРёРЅР°Р»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
+        originalHeight = standingHeight;
+        originalSpeed = speed;
+        targetHeight = standingHeight;
+
+        if (controller != null)
+        {
+            controller.height = standingHeight;
+        }
     }
 
     public void SetInput(Vector2 moveInput, Vector2 lookDelta, bool jumpPressed)
     {
         currentLookDelta = lookDelta;
-
-        // Обычный ввод
         currentMoveInput = moveInput;
 
         if (jumpPressed && !jumpConsumed)
@@ -76,10 +95,43 @@ public class SimpleFPSControllers : MonoBehaviour
         animator.SetFloat("Speed", horizontalVel.magnitude);
         animator.SetBool("IsGrounded", isGrounded);
         animator.SetBool("IsDead", isDead);
+        animator.SetBool("IsCrouching", isCrouching);
+    }
+
+    void HandleCrouch()
+    {
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            isCrouching = !isCrouching;
+
+            if (isCrouching)
+            {
+                targetHeight = crouchHeight;
+                speed = crouchSpeed;
+            }
+            else
+            {
+                targetHeight = standingHeight;
+                speed = originalSpeed;
+            }
+        }
+
+        if (controller != null)
+        {
+            float newHeight = Mathf.Lerp(controller.height, targetHeight, Time.deltaTime * crouchTransitionSpeed);
+            controller.height = newHeight;
+
+            Vector3 newCenter = controller.center;
+            newCenter.y = newHeight / 2f;
+            controller.center = newCenter;
+        }
     }
 
     void Update()
     {
+        // РћР±СЂР°Р±РѕС‚РєР° РїСЂРёСЃРµРґР°РЅРёСЏ
+        HandleCrouch();
+
         if (jumpBufferCounter > 0)
             jumpBufferCounter -= Time.deltaTime;
 
@@ -98,7 +150,6 @@ public class SimpleFPSControllers : MonoBehaviour
         Vector3 moveDirection = transform.right * currentMoveInput.x + transform.forward * currentMoveInput.y;
         Vector3 motion = (moveDirection * speed + playerVelocity) * Time.deltaTime;
 
-        // Теперь внутри Move есть и ходьба, и гравитация, и прыжок
         controller.Move(motion);
 
         UpdateAnimator();
@@ -109,10 +160,8 @@ public class SimpleFPSControllers : MonoBehaviour
     {
         if (isGrounded && playerVelocity.y < 0)
             playerVelocity.y = 0f;
-
         else
         {
-            // Обычное ускорение свободного падения
             playerVelocity.y += gravity * Time.deltaTime;
         }
     }
@@ -127,5 +176,10 @@ public class SimpleFPSControllers : MonoBehaviour
 
         playerCamera.localRotation = Quaternion.Euler(xRotation, 0, 0);
         transform.Rotate(Vector3.up * mouseX);
+    }
+
+    public Camera GetPlayerCamera()
+    {
+        return GetComponentInChildren<Camera>();
     }
 }

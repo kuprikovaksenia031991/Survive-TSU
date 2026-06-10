@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
 using TMPro;
 
@@ -12,7 +11,8 @@ public class OpeningCutscene : MonoBehaviour
     public GameObject zombie;
 
     [Header("Двери")]
-    public DoorController roomDoor;
+    public DoorController roomDoor;        // дверь здорового соседа
+    public DoorController sickRoomDoor;    // дверь больного соседа
 
     [Header("Аниматоры")]
     public Animator playerAnimator;
@@ -38,33 +38,44 @@ public class OpeningCutscene : MonoBehaviour
     public string[] neighbourLines;
     public string[] playerLines;
 
-    private SimpleFPSController fpsController;
+    private SimpleFPSControllers fpsController;
     private PlayerAttack playerAttack;
     private TextMeshProUGUI dialogueText;
+    private Camera playerCamera;
+    private Vector3 originalCameraPosition;
+    private Quaternion originalCameraRotation;
 
     void Start()
     {
-        fpsController = player.GetComponent<SimpleFPSController>();
+        fpsController = player.GetComponent<SimpleFPSControllers>();
         playerAttack = player.GetComponent<PlayerAttack>();
+        playerCamera = player.GetComponentInChildren<Camera>();
+
+        if (playerCamera != null)
+        {
+            originalCameraPosition = playerCamera.transform.localPosition;
+            originalCameraRotation = playerCamera.transform.localRotation;
+        }
 
         if (fpsController != null) fpsController.enabled = false;
         if (playerAttack != null) playerAttack.enabled = false;
 
-        // Отключаем RoommateAI
+        if (playerCamera != null)
+        {
+            playerCamera.transform.localPosition = originalCameraPosition;
+            playerCamera.transform.localRotation = Quaternion.Euler(0, 0, 0);
+        }
+
         RoommateAI roommateAI = sickNeighbour.GetComponent<RoommateAI>();
         if (roommateAI != null) roommateAI.enabled = false;
 
-        // Находим текст внутри панели диалога
         if (dialoguePanel != null)
         {
             dialogueText = dialoguePanel.GetComponentInChildren<TextMeshProUGUI>();
             if (dialogueText == null)
                 Debug.LogError("TextMeshPro не найден внутри DialoguePanel!");
-            else
-                Debug.Log("DialogueText найден: " + dialogueText.name);
         }
 
-        // Все на места
         player.transform.position = playerBedPosition.position;
         player.transform.rotation = playerBedPosition.rotation;
 
@@ -79,7 +90,7 @@ public class OpeningCutscene : MonoBehaviour
 
     IEnumerator CutsceneSequence()
     {
-        // Оба встают
+        // ========== ЧАСТЬ 1: ВСТАЮТ ==========
         yield return new WaitForSeconds(0.5f);
         if (playerAnimator != null) playerAnimator.SetTrigger("StandUp");
         yield return new WaitForSeconds(0.5f);
@@ -87,14 +98,18 @@ public class OpeningCutscene : MonoBehaviour
 
         yield return new WaitForSeconds(2f);
 
-        // ГГ поворачивается к соседу
         Vector3 lookTarget = new Vector3(neighbourRoom.transform.position.x,
             player.transform.position.y, neighbourRoom.transform.position.z);
         player.transform.LookAt(lookTarget);
 
+        if (playerCamera != null)
+        {
+            playerCamera.transform.localRotation = Quaternion.Euler(0, 0, 0);
+        }
+
         yield return new WaitForSeconds(0.5f);
 
-        // Сосед убегает
+        // ========== ЧАСТЬ 2: СОСЕД УБЕГАЕТ ==========
         if (roomDoor != null) roomDoor.ToggleDoor();
         if (audioSource != null && doorOpenSound != null)
             audioSource.PlayOneShot(doorOpenSound);
@@ -134,13 +149,12 @@ public class OpeningCutscene : MonoBehaviour
 
         yield return new WaitForSeconds(0.3f);
 
-        // Крик
+        // ========== ЧАСТЬ 3: КРИК И СМЕРТЬ ==========
         if (audioSource != null && screamSound != null)
             audioSource.PlayOneShot(screamSound);
 
         yield return new WaitForSeconds(screamSound != null ? screamSound.length : 2f);
 
-        // Сосед мёртв, зомби ест
         neighbourRoom.transform.position = neighbourDeathPosition.position;
         neighbourRoom.transform.rotation = Quaternion.Euler(90f, 0, 0);
         if (neighbourAnimator != null) neighbourAnimator.SetTrigger("Dead");
@@ -150,7 +164,13 @@ public class OpeningCutscene : MonoBehaviour
 
         yield return new WaitForSeconds(2f);
 
-        // Включаем управление и подсказку
+        // ========== ЧАСТЬ 4: ВКЛЮЧАЕМ УПРАВЛЕНИЕ ==========
+        if (playerCamera != null)
+        {
+            playerCamera.transform.localPosition = originalCameraPosition;
+            playerCamera.transform.localRotation = originalCameraRotation;
+        }
+
         if (fpsController != null) fpsController.enabled = true;
         if (playerAttack != null) playerAttack.enabled = true;
 
@@ -162,17 +182,41 @@ public class OpeningCutscene : MonoBehaviour
             dialoguePanel.SetActive(false);
         }
 
-        // Зомби начинает атаковать
+        // ========== ЧАСТЬ 5: АКТИВИРУЕМ ЗОМБИ ==========
         EnemyAITrigger enemyAI = zombie.GetComponent<EnemyAITrigger>();
-        if (enemyAI != null) enemyAI.enabled = true;
+        if (enemyAI != null)
+        {
+            enemyAI.Activate();
+            Debug.Log("Зомби активирован!");
+        }
+        else
+        {
+            Debug.LogError("На зомби нет компонента EnemyAITrigger!");
+        }
 
-        Debug.Log("Убейте зомби, затем подойдите к больному соседу и нажмите E");
+        Debug.Log("Убейте зомби");
 
-        // Ждём, пока игрок убьёт зомби
+        // ========== ЧАСТЬ 6: АКТИВИРУЕМ ПОМОЩЬ БОЛЬНОГО СОСЕДА ==========
+
+        if (sickRoomDoor != null)
+        {
+            sickRoomDoor.ToggleDoor();
+            Debug.Log("Дверь больного соседа открыта");
+        }
+
+        Vector3 groundPos = sickNeighbour.transform.position;
+        groundPos.y = 6.4f;
+        sickNeighbour.transform.position = groundPos;
+
+        SickNeighborHelper helper = sickNeighbour.GetComponent<SickNeighborHelper>();
+        if (helper != null)
+        {
+            helper.SetEnemy(zombie);
+            Debug.Log("Больной сосед активирован для помощи!");
+        }
+
+        // ========== ЧАСТЬ 7: ЖДЁМ СМЕРТИ ЗОМБИ ==========
         EnemyAITrigger zAI = zombie.GetComponent<EnemyAITrigger>();
-        Debug.Log("Проверка зомби: zombie=" + (zombie != null) + ", zAI=" + (zAI != null) + ", health=" + (zAI != null ? zAI.health : -1));
-
-        // Если зомби уже мёртв — воскрешаем
         if (zAI != null && zAI.health <= 0)
         {
             zAI.health = 80;
@@ -188,14 +232,13 @@ public class OpeningCutscene : MonoBehaviour
 
         Debug.Log("Зомби побеждён!");
 
-        // Подсказка подойти к соседу
+        // ========== ЧАСТЬ 8: ПОДСКАЗКА ПОДОЙТИ К СОСЕДУ ==========
         if (dialogueText != null)
         {
-            dialogueText.text = "Убейте зомби, используя ЛКМ, а затем подойдите к соседу и нажмите [E] для диалога";
+            dialogueText.text = "Подойдите к соседу и нажмите [E] для диалога";
             dialoguePanel.SetActive(true);
         }
 
-        // Ждём нажатия E рядом с соседом
         bool dialogueStarted = false;
         while (!dialogueStarted)
         {
@@ -214,8 +257,10 @@ public class OpeningCutscene : MonoBehaviour
 
         Debug.Log("ПЕРЕХОДИМ К ДИАЛОГУ");
 
-        // Телепортируем больного соседа к игроку
-        sickNeighbour.transform.position = player.transform.position + player.transform.forward * 2f;
+        // ========== ЧАСТЬ 9: ДИАЛОГ ==========
+        Vector3 teleportPos = player.transform.position + player.transform.forward * 2f;
+        teleportPos.y = 6.4f;
+        sickNeighbour.transform.position = teleportPos;
         sickNeighbour.transform.LookAt(player.transform);
 
         Animator sickAnim = sickNeighbour.GetComponent<Animator>();
@@ -227,12 +272,10 @@ public class OpeningCutscene : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        // ДИАЛОГ
         if (dialogueText != null)
         {
             dialoguePanel.SetActive(true);
 
-            // Все реплики по порядку
             string[] allLines = new string[neighbourLines.Length + playerLines.Length];
             int idx = 0;
             int maxLines = Mathf.Max(neighbourLines.Length, playerLines.Length);
@@ -268,5 +311,6 @@ public class OpeningCutscene : MonoBehaviour
         }
 
         Debug.Log("ДИАЛОГ ЗАВЕРШЁН. КАТ-СЦЕНА ОКОНЧЕНА.");
+    
     }
 }
